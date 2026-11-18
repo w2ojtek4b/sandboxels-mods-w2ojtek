@@ -1,7 +1,12 @@
 // bettersand.js
-// Adds smooth color blending between sand and wet sand, and allows colored water to dye sand.
+// Smooth color blending between sand and wet sand + water dye absorption
 
-runAfterLoad(function() {
+function startBetterSand() {
+    if (typeof elements === "undefined" || !elements.sand || !elements.wet_sand) {
+        setTimeout(startBetterSand, 200);
+        return;
+    }
+
     function parseRGB(colorStr) {
         if (!colorStr) return null;
         if (colorStr.startsWith("rgb")) {
@@ -22,9 +27,8 @@ runAfterLoad(function() {
         return null;
     }
 
-    // Smooth color transition between dry sand and wet sand
     function blendSandColors(pixel) {
-        if (Math.random() > 0.1) return;
+        if (Math.random() > 0.25) return;
         var c1 = parseRGB(pixel.color);
         if (!c1) return;
 
@@ -38,17 +42,16 @@ runAfterLoad(function() {
                 var c2 = parseRGB(other.color);
                 if (!c2) return;
 
-                var r = Math.round(c1.r * 0.85 + c2.r * 0.15);
-                var g = Math.round(c1.g * 0.85 + c2.g * 0.15);
-                var b = Math.round(c1.b * 0.85 + c2.b * 0.15);
+                var r = Math.round(c1.r * 0.75 + c2.r * 0.25);
+                var g = Math.round(c1.g * 0.75 + c2.g * 0.25);
+                var b = Math.round(c1.b * 0.75 + c2.b * 0.25);
                 pixel.color = "rgb(" + r + "," + g + "," + b + ")";
             }
         }
     }
 
-    // Dye sand using the color of adjacent water
     function absorbWaterColor(pixel) {
-        if (Math.random() > 0.25) return;
+        if (Math.random() > 0.4) return;
         var c1 = parseRGB(pixel.color);
         if (!c1) return;
 
@@ -62,9 +65,9 @@ runAfterLoad(function() {
                 var c2 = parseRGB(other.color);
                 if (!c2) return;
 
-                var r = Math.round(c1.r * 0.7 + (c2.r * 0.85) * 0.3);
-                var g = Math.round(c1.g * 0.7 + (c2.g * 0.85) * 0.3);
-                var b = Math.round(c1.b * 0.7 + (c2.b * 0.85) * 0.3);
+                var r = Math.round(c1.r * 0.6 + (c2.r * 0.85) * 0.4);
+                var g = Math.round(c1.g * 0.6 + (c2.g * 0.85) * 0.4);
+                var b = Math.round(c1.b * 0.6 + (c2.b * 0.85) * 0.4);
                 pixel.color = "rgb(" + r + "," + g + "," + b + ")";
             }
         }
@@ -72,13 +75,19 @@ runAfterLoad(function() {
 
     var sandList = "sand,wet_sand".split(",");
     sandList.forEach(function(elName) {
-        if (elements[elName]) {
-            var oldTick = elements[elName].tick;
-            elements[elName].tick = function(pixel) {
+        var el = elements[elName];
+        if (el && !el._betterSandHooked) {
+            el._betterSandHooked = true;
+            var oldTick = el.tick;
+            el.tick = function(pixel) {
                 if (oldTick) oldTick(pixel);
                 blendSandColors(pixel);
                 absorbWaterColor(pixel);
             };
         }
     });
-});
+
+    console.log("bettersand.js podpiety poprawnie!");
+}
+
+startBetterSand();
