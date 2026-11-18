@@ -1,3 +1,5 @@
+// mod is buged not updated
+
 // bettersand.js
 // Smooth color blending between sand and wet sand + water dye absorption
 
